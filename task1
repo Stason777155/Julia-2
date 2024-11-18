@@ -1,1 +1,63 @@
+# 1) Спроектировать параметрический тип данных Polynomial, реализовать
+#операции +,-,*
 
+# Определение параметрического типа данных Polynomial
+struct Polynomial
+    coeffs::Vector{Float64}  # Вектор коэффициентов
+
+    # Внутренний конструктор
+    function Polynomial(coeffs::Vector{Float64})
+        # Удаляем ведущие нули из коэффициентов
+        while !isempty(coeffs) && coeffs[end] == 0.0
+            pop!(coeffs)
+        end
+        return new(coeffs)
+    end
+end
+
+# Операция сложения
+import Base: +
+
+function Base.:+(p1::Polynomial, p2::Polynomial)
+    max_len = max(length(p1.coeffs), length(p2.coeffs))
+    coeffs1 = vcat(p1.coeffs, zeros(max_len - length(p1.coeffs)))
+    coeffs2 = vcat(p2.coeffs, zeros(max_len - length(p2.coeffs)))
+    return Polynomial(coeffs1 .+ coeffs2)
+end
+
+# Операция вычитания
+import Base: -
+
+function Base.:-(p1::Polynomial, p2::Polynomial)
+    max_len = max(length(p1.coeffs), length(p2.coeffs))
+    coeffs1 = vcat(p1.coeffs, zeros(max_len - length(p1.coeffs)))
+    coeffs2 = vcat(p2.coeffs, zeros(max_len - length(p2.coeffs)))
+    return Polynomial(coeffs1 .- coeffs2)
+end
+
+# Операция умножения
+import Base: *
+
+function Base.:*(p1::Polynomial, p2::Polynomial)
+    result_coeffs = zeros(Float64, length(p1.coeffs) + length(p2.coeffs) - 1)
+    
+    for i in 1:length(p1.coeffs)
+        for j in 1:length(p2.coeffs)
+            result_coeffs[i + j - 1] += p1.coeffs[i] * p2.coeffs[j]
+        end
+    end
+    
+    return Polynomial(result_coeffs)
+end
+
+# Пример использования
+p1 = Polynomial([3.0, 0.0, 1.0])  # Многочлен 3x^2 + 0x + 3
+p2 = Polynomial([5.0, 2.0])        # Многочлен 5x + 2
+
+sum_poly = p1 + p2                # Сложение
+diff_poly = p1 - p2               # Вычитание
+prod_poly = p1 * p2               # Умножение
+
+println("Сумма: ", sum_poly.coeffs)      # Вывод результата сложения
+println("Разность: ", diff_poly.coeffs)   # Вывод результата вычитания
+println("Произведение: ", prod_poly.coeffs) # Вывод результата умножения
